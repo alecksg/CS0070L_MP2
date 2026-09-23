@@ -1,1 +1,140 @@
+package com.mycompany.mp2;
 
+import java.util.Scanner;
+
+public class MP2 {
+
+    static class Student {
+        private String id;
+        private String fullName;
+
+        public Student(String id, String fullName) {
+            this.id = id;
+            this.fullName = fullName;
+        }
+
+        public String getid() {
+            return id;
+        }
+
+        public String getfullName() {
+            return fullName;
+        }
+    }
+
+    static class Course {
+        private String code;
+        private String title;
+        private int capacity;
+        private Student[] enrolledStudents;
+        private int enrolledCount;
+
+        public Course(String code, String title, int capacity) {
+            this.code = code;
+            this.title = title;
+            this.capacity = capacity;
+            this.enrolledStudents = new Student[capacity];
+            this.enrolledCount = 0;
+        }
+
+        public Student findStudent(String id) {
+            for (int i = 0; i < enrolledCount; i++) {
+                if (enrolledStudents[i].getid().equals(id)) {
+                    return enrolledStudents[i];
+                }
+            }
+            return null;
+        }
+
+        public boolean enroll(Student student) {
+            if (student == null) {
+                return false;
+            }
+
+            if (enrolledCount >= capacity) {
+                return false;
+            }
+
+            if (findStudent(student.getid()) != null) {
+                return false;
+            }
+
+            enrolledStudents[enrolledCount] = student;
+            enrolledCount++;
+
+            return true;
+        }
+
+        public void displayRoster() {
+            System.out.println("Final roster:");
+
+            for (int i = 0; i < enrolledCount; i++) {
+                System.out.println(enrolledStudents[i].getid() + " - "
+                        + enrolledStudents[i].getfullName());
+            }
+
+            System.out.println("Occupied: " + enrolledCount);
+            System.out.println("Remaining: " + (capacity - enrolledCount));
+        }
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("Course code: ");
+        String code = sc.nextLine();
+
+        System.out.print("Course title: ");
+        String title = sc.nextLine();
+
+        System.out.print("Capacity: ");
+        int capacity = sc.nextInt();
+        sc.nextLine();
+
+        Course course = new Course(code, title, capacity);
+
+        System.out.print("Number of students: ");
+        int n = sc.nextInt();
+        sc.nextLine();
+
+        Student[] students = new Student[n];
+
+        for (int i = 0; i < n; i++) {
+            System.out.print("Student ID: ");
+            String id = sc.nextLine();
+
+            System.out.print("Student name: ");
+            String fullName = sc.nextLine();
+
+            students[i] = new Student(id, fullName);
+        }
+
+        System.out.print("Enrollment attempts: ");
+        int attempts = sc.nextInt();
+        sc.nextLine();
+
+        for (int i = 0; i < attempts; i++) {
+            System.out.print("Student ID to enroll: ");
+            String id = sc.nextLine();
+
+            Student student = null;
+
+            for (int j = 0; j < n; j++) {
+                if (students[j].getid().equals(id)) {
+                    student = students[j];
+                    break;
+                }
+            }
+
+            if (course.enroll(student)) {
+                System.out.println("Enrolled");
+            } else {
+                System.out.println("Rejected");
+            }
+        }
+
+        course.displayRoster();
+
+        sc.close();
+    }
+}
