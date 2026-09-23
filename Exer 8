@@ -1,1 +1,216 @@
+package com.mycompany.mp2;
 
+import java.util.Scanner;
+
+public class MP2 {
+
+    static class Product {
+        private String code;
+        private String name;
+        private double price;
+        private int stock;
+
+        public Product(String code, String name, double price, int stock) {
+            this.code = code;
+            this.name = name;
+            this.price = price;
+            this.stock = stock;
+        }
+
+        public String getCode() {
+            return code;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public double getPrice() {
+            return price;
+        }
+
+        public int getStock() {
+            return stock;
+        }
+
+        public boolean reduceStock(int quantity) {
+            if (quantity > 0 && quantity <= stock) {
+                stock -= quantity;
+                return true;
+            }
+
+            return false;
+        }
+    }
+
+    static class CartItem {
+        private Product product;
+        private int quantity;
+
+        public CartItem(Product product, int quantity) {
+            this.product = product;
+            this.quantity = quantity;
+        }
+
+        public Product getProduct() {
+            return product;
+        }
+
+        public int getQuantity() {
+            return quantity;
+        }
+
+        public void addQuantity(int quantity) {
+            this.quantity += quantity;
+        }
+
+        public double getTotal() {
+            return product.getPrice() * quantity;
+        }
+    }
+
+    static class ShoppingCart {
+        private CartItem[] items;
+        private int itemCount;
+
+        public ShoppingCart(int capacity) {
+            items = new CartItem[capacity];
+            itemCount = 0;
+        }
+
+        public boolean addProduct(Product product, int quantity) {
+            if (product == null || quantity <= 0) {
+                return false;
+            }
+
+            if (!product.reduceStock(quantity)) {
+                return false;
+            }
+
+            for (int i = 0; i < itemCount; i++) {
+                if (items[i].getProduct().getCode().equals(product.getCode())) {
+                    items[i].addQuantity(quantity);
+                    return true;
+                }
+            }
+
+            items[itemCount] = new CartItem(product, quantity);
+            itemCount++;
+
+            return true;
+        }
+
+        public double getSubtotal() {
+            double subtotal = 0;
+
+            for (int i = 0; i < itemCount; i++) {
+                subtotal += items[i].getTotal();
+            }
+
+            return subtotal;
+        }
+
+        public double getDiscount() {
+            double subtotal = getSubtotal();
+
+            if (subtotal >= 5000) {
+                return subtotal * 0.10;
+            } else if (subtotal >= 2000) {
+                return subtotal * 0.05;
+            }
+
+            return 0;
+        }
+
+        public double getVat() {
+            return (getSubtotal() - getDiscount()) * 0.12;
+        }
+
+        public double getFinalTotal() {
+            return getSubtotal() - getDiscount() + getVat();
+        }
+
+        public void displayReceipt() {
+            System.out.println("\nReceipt:");
+
+            for (int i = 0; i < itemCount; i++) {
+                System.out.println(items[i].getProduct().getName()
+                        + " x" + items[i].getQuantity()
+                        + " = " + items[i].getTotal());
+            }
+
+            System.out.printf("Subtotal: %.2f%n", getSubtotal());
+            System.out.printf("Discount: %.2f%n", getDiscount());
+            System.out.printf("VAT: %.2f%n", getVat());
+            System.out.printf("Final total: %.2f%n", getFinalTotal());
+        }
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("Number of products: ");
+        int productCount = sc.nextInt();
+        sc.nextLine();
+
+        Product[] products = new Product[productCount];
+
+        for (int i = 0; i < productCount; i++) {
+            System.out.print("Product code: ");
+            String code = sc.nextLine();
+
+            System.out.print("Product name: ");
+            String name = sc.nextLine();
+
+            System.out.print("Price: ");
+            double price = sc.nextDouble();
+
+            System.out.print("Stock: ");
+            int stock = sc.nextInt();
+            sc.nextLine();
+
+            products[i] = new Product(code, name, price, stock);
+        }
+
+        ShoppingCart cart = new ShoppingCart(productCount);
+
+        System.out.print("Number of add-to-cart actions: ");
+        int actions = sc.nextInt();
+        sc.nextLine();
+
+        for (int i = 0; i < actions; i++) {
+            System.out.print("Product code: ");
+            String code = sc.nextLine();
+
+            System.out.print("Quantity: ");
+            int quantity = sc.nextInt();
+            sc.nextLine();
+
+            Product product = null;
+
+            for (int j = 0; j < productCount; j++) {
+                if (products[j].getCode().equals(code)) {
+                    product = products[j];
+                    break;
+                }
+            }
+
+            if (cart.addProduct(product, quantity)) {
+                System.out.println("Added.");
+            } else {
+                System.out.println("Addition rejected.");
+            }
+        }
+
+        cart.displayReceipt();
+
+        System.out.println("Remaining stock:");
+
+        for (int i = 0; i < productCount; i++) {
+            System.out.println(products[i].getCode() + ": "
+                    + products[i].getStock());
+        }
+
+        sc.close();
+    }
+}
