@@ -1,1 +1,194 @@
+package com.mycompany.mp2;
 
+import java.util.Scanner;
+
+public class MP2 {
+
+    static class Guest {
+        private String guestId;
+        private String fullName;
+
+        public Guest(String guestId, String fullName) {
+            this.guestId = guestId;
+            this.fullName = fullName;
+        }
+
+        public String getGuestId() {
+            return guestId;
+        }
+
+        public String getFullName() {
+            return fullName;
+        }
+    }
+
+    static class Room {
+        private String roomNumber;
+        private String roomType;
+        private double nightlyRate;
+        private boolean available;
+
+        public Room(String roomNumber, String roomType, double nightlyRate) {
+            this.roomNumber = roomNumber;
+            this.roomType = roomType;
+            this.nightlyRate = nightlyRate;
+            this.available = true;
+        }
+
+        public String getRoomNumber() {
+            return roomNumber;
+        }
+
+        public double getNightlyRate() {
+            return nightlyRate;
+        }
+
+        public boolean isAvailable() {
+            return available;
+        }
+
+        public boolean reserve() {
+            if (available) {
+                available = false;
+                return true;
+            }
+
+            return false;
+        }
+
+        public void release() {
+            available = true;
+        }
+    }
+
+    static class Reservation {
+        private String reservationId;
+        private Guest guest;
+        private Room room;
+        private int nights;
+
+        public Reservation(String reservationId, Guest guest, Room room, int nights) {
+            this.reservationId = reservationId;
+            this.guest = guest;
+            this.room = room;
+            this.nights = nights;
+        }
+
+        public double getTotalCost() {
+            return room.getNightlyRate() * nights;
+        }
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("Number of rooms: ");
+        int roomCount = sc.nextInt();
+        sc.nextLine();
+
+        Room[] rooms = new Room[roomCount];
+
+        for (int i = 0; i < roomCount; i++) {
+            System.out.print("Room number: ");
+            String roomNumber = sc.nextLine();
+
+            System.out.print("Room type: ");
+            String roomType = sc.nextLine();
+
+            System.out.print("Nightly rate: ");
+            double nightlyRate = sc.nextDouble();
+            sc.nextLine();
+
+            rooms[i] = new Room(roomNumber, roomType, nightlyRate);
+        }
+
+        System.out.print("Number of guests: ");
+        int guestCount = sc.nextInt();
+        sc.nextLine();
+
+        Guest[] guests = new Guest[guestCount];
+
+        for (int i = 0; i < guestCount; i++) {
+            System.out.print("Guest ID: ");
+            String guestId = sc.nextLine();
+
+            System.out.print("Guest name: ");
+            String fullName = sc.nextLine();
+
+            guests[i] = new Guest(guestId, fullName);
+        }
+
+        System.out.print("Reservation requests: ");
+        int requestCount = sc.nextInt();
+        sc.nextLine();
+
+        Reservation[] reservations = new Reservation[requestCount];
+        int reservationCount = 0;
+
+        for (int i = 0; i < requestCount; i++) {
+            System.out.print("Reservation ID: ");
+            String reservationId = sc.nextLine();
+
+            System.out.print("Guest ID: ");
+            String guestId = sc.nextLine();
+
+            System.out.print("Room number: ");
+            String roomNumber = sc.nextLine();
+
+            System.out.print("Nights: ");
+            int nights = sc.nextInt();
+            sc.nextLine();
+
+            Guest foundGuest = null;
+            Room foundRoom = null;
+
+            for (int j = 0; j < guestCount; j++) {
+                if (guests[j].getGuestId().equals(guestId)) {
+                    foundGuest = guests[j];
+                    break;
+                }
+            }
+
+            for (int j = 0; j < roomCount; j++) {
+                if (rooms[j].getRoomNumber().equals(roomNumber)) {
+                    foundRoom = rooms[j];
+                    break;
+                }
+            }
+
+            if (foundGuest == null || foundRoom == null || nights < 1) {
+                System.out.println("Reservation rejected.");
+            } else if (!foundRoom.reserve()) {
+                System.out.println("Reservation rejected: Room unavailable.");
+            } else {
+                reservations[reservationCount] =
+                        new Reservation(reservationId, foundGuest, foundRoom, nights);
+
+                System.out.printf("Reservation accepted. Total cost = %.2f%n",
+                        reservations[reservationCount].getTotalCost());
+
+                System.out.println("Room " + foundRoom.getRoomNumber() + " unavailable.");
+
+                reservationCount++;
+            }
+        }
+
+        double totalRevenue = 0;
+
+        for (int i = 0; i < reservationCount; i++) {
+            totalRevenue += reservations[i].getTotalCost();
+        }
+
+        System.out.printf("Total revenue = %.2f%n", totalRevenue);
+
+        System.out.println("Available rooms:");
+
+        for (int i = 0; i < roomCount; i++) {
+            if (rooms[i].isAvailable()) {
+                System.out.println("Room " + rooms[i].getRoomNumber());
+            }
+        }
+
+        sc.close();
+    }
+}
